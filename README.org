@@ -1,0 +1,3 @@
+* P1_core
+
+This package contains the absolute minimum for p1-based parsing.
