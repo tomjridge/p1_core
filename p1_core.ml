@@ -45,11 +45,7 @@ type 'b parser_ = input -> 'b result
    depends on the notion of context. Context comes later, and is
    modularly combined with the following. *)
 
-let unique xs = 
-  xs 
-  |> Tjr_list.with_each_elt 
-    ~step:(fun ~state x -> if List.mem x state then state else x::state)
-    ~init_state:[]
+let unique = Tjr_list.unique
 
 let ( >> ) p f = (fun i0 ->
     i0 |> p |> List.map (fun (e,s) -> (f e, s)) |> unique)
