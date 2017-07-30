@@ -23,17 +23,17 @@ end
 include Context'
 
 (* type 'a s = 'a Substring.t *)
-type s = substring_
+type ss = substring_
 
 
-type input = { ctxt:ctxt; s : substring_ }
+type input = { ctxt:ctxt; ss : substring_ }
 
-let to_input s = { ctxt=empty; s }
+let to_input ss = { ctxt=empty; ss }
 
-let lift f i = {i with s=(f i.s) } 
+let lift f i = {i with ss=(f i.ss) } 
 
 
-type 'b result = ('b * s) list
+type 'b result = ('b * ss) list
 
 type 'b parser_ = input -> 'b result
 
@@ -59,7 +59,7 @@ let (_: 'b parser_ -> 'b parser_ -> 'b parser_) = ( ||| )
 (* a version of the combinator that ignores duplicate entries FIXME *)
 let ( **> ) p1 p2 i = (
   let f (e1,s1) =
-    { ctxt=i.ctxt; s=s1 } |> p2 |> List.map (fun (e2,s2) -> ((e1,e2),s2))
+    { ctxt=i.ctxt; ss=s1 } |> p2 |> List.map (fun (e2,s2) -> ((e1,e2),s2))
   in
   i |> p1 |> List.map f |> List.concat)
 
@@ -67,9 +67,9 @@ let (_: 'b parser_ -> 'c parser_ -> ('b*'c) parser_) = ( **> )
 
 
 let ignr_last p i = (
-  match (i.s|>sublen) with
+  match (i.ss|>sublen) with
   | 0 -> []
-  | _ -> {i with s = i.s|>dec_j} |> p |> List.map (fun (v,s) -> (v,s|>inc_j)))
+  | _ -> {i with ss = i.ss|>dec_j} |> p |> List.map (fun (v,s) -> (v,s|>inc_j)))
 
 let (_: 'b parser_ -> 'b parser_) = ignr_last
 
@@ -118,13 +118,13 @@ module Context = struct
   (* nonterm -> 'a parser_ -> 'a parser_ *)
   (* was update_lctxt *)
   let update_p nt p = (fun i0 ->
-      p { i0 with ctxt=(update i0.ctxt (nt,i0.s.i_,i0.s.j_)) })
+      p { i0 with ctxt=(update i0.ctxt (nt,i0.ss.i_,i0.ss.j_)) })
 
   let (_:nonterm -> 'b parser_ -> 'b parser_) = update_p
 
   let check nt p = (fun i0 ->
-      let should_trim = contains i0.ctxt (nt,i0.s.i_,i0.s.j_) in
-      if should_trim && (i0.s|>sublen = 0) then
+      let should_trim = contains i0.ctxt (nt,i0.ss.i_,i0.ss.j_) in
+      if should_trim && (i0.ss|>sublen = 0) then
         []
       else if should_trim then
         (ignr_last (update_p nt p)) i0
@@ -142,7 +142,7 @@ include Context
    string component *)
 type hashkey = (ctxt * int * int)
 
-let hashkey_of_input i0 = (i0.ctxt,i0.s.i_,i0.s.j_)
+let hashkey_of_input i0 = (i0.ctxt,i0.ss.i_,i0.ss.j_)
 
 (* generic memo function *)
 let memo tbl key_of_input f i = (
