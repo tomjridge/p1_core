@@ -6,7 +6,9 @@ open Tjr_substring
 let sublen = Tjr_substring.length
 
 
-let dec_j s = {s with j_=s.j_ - 1}
+let dec_j s = 
+  assert (sublen s > 0);
+  {s with j_=s.j_ - 1}
 
 let inc_j s = {s with j_=s.j_ + 1}
 
@@ -68,6 +70,7 @@ let (_: 'b parser_ -> 'c parser_ -> ('b*'c) parser_) = ( **> )
 
 let ignr_last p i = (
   match (i.ss|>sublen) with
+  | l when l < 0 -> assert false
   | 0 -> []
   | _ -> {i with ss = i.ss|>dec_j} |> p |> List.map (fun (v,s) -> (v,s|>inc_j)))
 
