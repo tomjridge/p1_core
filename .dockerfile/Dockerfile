@@ -12,6 +12,5 @@ RUN eval `opam config env` && opam pin add tjr_lib https://github.com/tomjridge/
 
 RUN git clone https://github.com/tomjridge/p1_core.git
 RUN eval `opam config env` && opam pin add p1_core ./p1_core
-RUN eval `opam config env` && opam install p1_core
 
 RUN eval `opam config env` && cd p1_core && make all p1_examples.native && ./p1_examples.native
