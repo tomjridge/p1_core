@@ -11,6 +11,9 @@ RUN opam update
 RUN eval `opam config env` && opam pin add tjr_lib https://github.com/tomjridge/tjr_lib.git
 
 RUN git clone https://github.com/tomjridge/p1_core.git
+
+# NOTE opam pin has the side effect of building p1_core; this checks the opam file
 RUN eval `opam config env` && opam pin add p1_core ./p1_core
 
+# NOTE we also build p1_core directly, and run the examples
 RUN eval `opam config env` && cd p1_core && make all p1_examples.native && ./p1_examples.native
