@@ -1,0 +1,21 @@
+opam-version: "1.2"
+name: "p1_core"
+
+version: "opam??"
+
+maintainer: "Tom Ridge <tom.j.ridge@googlemail.com>"
+authors: "Tom Ridge <tom.j.ridge@googlemail.com>"
+homepage: "https://github.com/tomjridge/p1_core"
+bug-reports: "https://github.com/tomjridge/p1_core/issues"
+dev-repo: "https://github.com/tomjridge/p1_core.git"
+
+build: [
+  [make "all"]
+]
+install: [make "install"]
+remove: ["ocamlfind" "remove" "p1_core"]
+
+depends: [
+  "tjr_lib"
+]
+
