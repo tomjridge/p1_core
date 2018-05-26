@@ -8,6 +8,8 @@ FROM ocaml/opam:ubuntu-16.04_ocaml-4.04.2
 RUN opam list
 RUN opam update
 
+RUN opam install core_kernel rresult bos fileutils omd
+
 # NOTE in following not sure why this eval needs to be there -
 # shouldn't the default RUN setup the opam env anyway?
 
