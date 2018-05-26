@@ -8,14 +8,10 @@ FROM ocaml/opam:ubuntu-16.04_ocaml-4.04.2
 RUN opam list
 RUN opam update
 
-RUN opam install core_kernel rresult bos fileutils omd
-
-# NOTE in following not sure why this eval needs to be there -
-# shouldn't the default RUN setup the opam env anyway?
-
-RUN git clone https://github.com/tomjridge/tjr_lib.git
-RUN eval `opam config env` && make -C tjr_lib
+RUN eval `opam config env` && opam pin add tjr_lib https://github.com/tomjridge/tjr_lib.git
 
 RUN git clone https://github.com/tomjridge/p1_core.git
-RUN eval `opam config env` && make -C p1_core all p1_examples.native
-RUN cd p1_core && ./p1_examples.native
+RUN eval `opam config env` && opam pin add p1_core ./p1_core
+RUN eval `opam config env` && opam install p1_core
+
+RUN cd p1_core && make all p1_examples.native && ./p1_examples.native
