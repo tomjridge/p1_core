@@ -24,19 +24,19 @@ let a1 (s:substring_) = (
 
 open P1_core
 
-let a1 : string parser_ = (fun i -> a1 i.s)
+let a1 : string parser_ = (fun i -> a1 i.ss)
 
-let eps i = [("",i.s)]
+let eps i = [("",i.ss)]
 
 
 (* example grammar: E -> E E E | "1" | eps -------------------- *)
 
 (* FIXME why eta expand? *)
-let rec _E i = (
+let rec _E i = 
   check "E" (
     ((_E **> _E **> _E) >> fun (x,(y,z)) -> x+y+z)
     ||| (a1 >> fun _ -> 1)
-    ||| (eps >> fun _ -> 0)) i)
+    ||| (eps >> fun _ -> 0)) i
 
 let f () = "111" |> run_parser _E 
 let _ = start_stop "example muv" f
