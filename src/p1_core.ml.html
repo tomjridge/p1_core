@@ -9,8 +9,6 @@
 body { font-family: Ubuntu Mono;  font-stretch: normal;  font-weight: 500;  font-style: normal;  color: #000000;  background: #ffffff;  font-size: 10pt;  text-decoration: none; }
 span.default   { font-family: Ubuntu Mono;  font-stretch: normal;  font-weight: 500;  font-style: normal;  color: #000000;  background: #ffffff;  font-size: 10pt;  text-decoration: none; }
 span.default a { font-family: Ubuntu Mono;  font-stretch: normal;  font-weight: 500;  font-style: normal;  color: #000000;  background: #ffffff;  font-size: 10pt;  text-decoration: underline; }
-span.builtin   { color: #483d8b;  font-family: Ubuntu Mono;  font-stretch: normal;  font-weight: 500;  font-style: normal;  background: #ffffff;  font-size: 10pt;  text-decoration: none; }
-span.builtin a { color: #483d8b;  font-family: Ubuntu Mono;  font-stretch: normal;  font-weight: 500;  font-style: normal;  background: #ffffff;  font-size: 10pt;  text-decoration: underline; }
 span.constant   { color: #008b8b;  font-family: Ubuntu Mono;  font-stretch: normal;  font-weight: 500;  font-style: normal;  background: #ffffff;  font-size: 10pt;  text-decoration: none; }
 span.constant a { color: #008b8b;  font-family: Ubuntu Mono;  font-stretch: normal;  font-weight: 500;  font-style: normal;  background: #ffffff;  font-size: 10pt;  text-decoration: underline; }
 span.type   { color: #228b22;  font-family: Ubuntu Mono;  font-stretch: normal;  font-weight: 500;  font-style: normal;  background: #ffffff;  font-size: 10pt;  text-decoration: none; }
@@ -134,10 +132,11 @@ span.comment-delimiter a { color: #b22222;  font-family: Ubuntu Mono;  font-stre
 <pre><span class="comment-delimiter">(* </span><span class="comment">NOTE this is less general than it could be: no need to assume we
    are parsing strings </span><span class="comment-delimiter">*)</span>
 
+<span class="comment-delimiter">(* </span><span class="comment">substrings ------------------------------------------------------- </span><span class="comment-delimiter">*)</span>
+
 <span class="governing">open </span><span class="module">Tjr_substring</span>
 
 <span class="governing">let</span> <span class="variable-name">sublen</span> <span class="operator">=</span> <span class="module">Tjr_substring.</span>length
-
 
 <span class="governing">let</span> <span class="function-name">dec_j</span><span class="variable-name"> s</span> <span class="operator">=</span> 
   <span class="keyword">assert</span> <span class="operator">(</span>sublen s <span class="operator">&gt;</span> 0<span class="operator">);</span>
@@ -146,27 +145,37 @@ span.comment-delimiter a { color: #b22222;  font-family: Ubuntu Mono;  font-stre
 <span class="governing">let</span> <span class="function-name">inc_j</span><span class="variable-name"> s</span> <span class="operator">=</span> <span class="operator">{</span>s <span class="keyword">with</span> j_<span class="operator">=</span>s.j_ <span class="operator">+</span> 1<span class="operator">}</span>
 
 
-<span class="governing">type</span> <span class="type">nonterm</span> <span class="operator">=</span> string
-
-
-<span class="governing">module</span> <span class="module">Context'</span> <span class="operator">=</span> <span class="governing">struct</span>
-  <span class="comment-delimiter">(* </span><span class="comment">ctxt is a list of (nt,i,j) recording that we are already parsing nt for span i,j </span><span class="comment-delimiter">*)</span>
-  <span class="governing">type</span> <span class="type">elt</span> <span class="operator">=</span> <span class="operator">(</span>nonterm <span class="operator">*</span> int <span class="operator">*</span> int<span class="operator">)</span>  <span class="comment-delimiter">(* </span><span class="comment">FIXME really need an extra arg int for the string </span><span class="comment-delimiter">*)</span>
-  <span class="governing">type</span> <span class="type">ctxt</span> <span class="operator">=</span> elt list 
-  <span class="governing">let</span> <span class="variable-name">empty</span> <span class="operator">=</span> <span class="operator">[]</span>
-<span class="governing">end</span>
-<span class="governing">include</span> <span class="module">Context'</span>
-
-<span class="comment-delimiter">(* </span><span class="comment">type 'a s = 'a Substring.t </span><span class="comment-delimiter">*)</span>
 <span class="governing">type</span> <span class="type">ss</span> <span class="operator">=</span> substring_
 
 
+
+<span class="comment-delimiter">(* </span><span class="comment">nonterm ---------------------------------------------------------- </span><span class="comment-delimiter">*)</span>
+
+<span class="governing">type</span> <span class="type">nonterm</span> <span class="operator">=</span> string
+
+
+<span class="comment-delimiter">(* </span><span class="comment">contexts --------------------------------------------------------- </span><span class="comment-delimiter">*)</span>
+
+<span class="comment-delimiter">(* </span><span class="comment">ctxt is a list of (nt,i,j) recording that we are already parsing nt
+   for span i,j; since in a ctxt all i,j are equal, we can just record a
+   list of nts with the span i,j </span><span class="comment-delimiter">*)</span>
+<span class="governing">type</span> <span class="type">ctxt</span> <span class="operator">=</span> <span class="operator">{</span> nts<span class="operator">:</span> nonterm list<span class="operator">;</span> span<span class="operator">:</span> int <span class="operator">*</span> int <span class="operator">}</span>
+
+<span class="governing">let</span> <span class="variable-name">empty_ctxt</span> <span class="operator">=</span> <span class="operator">{</span> nts<span class="operator">=[];</span> span<span class="operator">=(</span>0<span class="operator">,</span>max_int<span class="operator">)</span> <span class="operator">}</span>  <span class="comment-delimiter">(* </span><span class="comment">FIXME max_int a bit ugly </span><span class="comment-delimiter">*)</span>
+
+
+
+<span class="comment-delimiter">(* </span><span class="comment">inputs ----------------------------------------------------------- </span><span class="comment-delimiter">*)</span>
+
 <span class="governing">type</span> <span class="type">input</span> <span class="operator">=</span> <span class="operator">{</span> ctxt<span class="operator">:</span>ctxt<span class="operator">;</span> ss <span class="operator">:</span> substring_ <span class="operator">}</span>
 
-<span class="governing">let</span> <span class="function-name">to_input</span><span class="variable-name"> ss</span> <span class="operator">=</span> <span class="operator">{</span> ctxt<span class="operator">=</span>empty<span class="operator">;</span> ss <span class="operator">}</span>
+<span class="governing">let</span> <span class="function-name">to_input</span><span class="variable-name"> ss</span> <span class="operator">=</span> <span class="operator">{</span> ctxt<span class="operator">=</span>empty_ctxt<span class="operator">;</span> ss <span class="operator">}</span>
 
+<span class="comment-delimiter">(* </span><span class="comment">FIXME needed? </span><span class="comment-delimiter">*)</span>
 <span class="governing">let</span> <span class="function-name">lift</span><span class="variable-name"> f i</span> <span class="operator">=</span> <span class="operator">{</span>i <span class="keyword">with</span> ss<span class="operator">=(</span>f i.ss<span class="operator">)</span> <span class="operator">}</span> 
 
+
+<span class="comment-delimiter">(* </span><span class="comment">results and parsers ---------------------------------------------- </span><span class="comment-delimiter">*)</span>
 
 <span class="governing">type</span> <span class="type">'b result</span> <span class="operator">=</span> <span class="operator">(</span>'b <span class="operator">*</span> ss<span class="operator">)</span> list
 
@@ -211,66 +220,41 @@ span.comment-delimiter a { color: #b22222;  font-family: Ubuntu Mono;  font-stre
 
 
 
-<span class="comment-delimiter">(* </span><span class="comment">context ---------------------------------------- </span><span class="comment-delimiter">*)</span>
+<span class="comment-delimiter">(* </span><span class="comment">more context ------------------------------------ </span><span class="comment-delimiter">*)</span>
 
-<span class="governing">module</span> <span class="module">Context</span> <span class="operator">=</span> <span class="governing">struct</span>
+<span class="governing">let</span> <span class="function-name">update</span><span class="variable-name"> </span><span class="operator">~</span><span class="variable-name">ctxt </span><span class="operator">(</span><span class="variable-name">nt</span><span class="operator">,</span><span class="variable-name">l</span><span class="operator">,</span><span class="variable-name">h</span><span class="operator">)</span> <span class="operator">=</span> 
+  <span class="governing">let</span> <span class="operator">(</span><span class="variable-name">l'</span><span class="operator">,</span><span class="variable-name">h'</span><span class="operator">)</span> <span class="operator">=</span> ctxt.span <span class="governing">in</span>
+  <span class="keyword">assert</span><span class="operator">(</span>l<span class="operator">&gt;=</span>l' <span class="operator">&amp;&amp;</span> h <span class="operator">&lt;=</span> h'<span class="operator">);</span>
+  <span class="keyword">match</span> <span class="operator">(</span>l<span class="operator">,</span>h<span class="operator">)</span> <span class="operator">=</span> <span class="operator">(</span>l'<span class="operator">,</span>h'<span class="operator">)</span> <span class="keyword">with</span>
+  <span class="operator">|</span> <span class="constant">true</span> <span class="operator">-&gt;</span>
+    <span class="keyword">assert</span><span class="operator">(not</span> <span class="operator">(</span><span class="module">List.</span>mem nt ctxt.nts<span class="operator">));</span>
+    <span class="operator">{</span> ctxt <span class="keyword">with</span> nts<span class="operator">=</span>nt<span class="operator">::</span>ctxt.nts <span class="operator">}</span>
+  <span class="operator">|</span> <span class="constant">false</span> <span class="operator">-&gt;</span>
+    <span class="operator">{</span> nts<span class="operator">=[</span>nt<span class="operator">];</span> span<span class="operator">=(</span>l<span class="operator">,</span>h<span class="operator">)</span> <span class="operator">}</span>
 
-  <span class="comment-delimiter">(* </span><span class="comment">debug version; assumes s1 = s2 (since the only part of the
-     context that matters is...) </span><span class="comment-delimiter">*)</span>
-  <span class="governing">let</span> <span class="function-name">cmp</span><span class="variable-name"> </span><span class="operator">(</span><span class="variable-name">nt1</span><span class="operator">,</span><span class="variable-name">l1</span><span class="operator">,</span><span class="variable-name">h1</span><span class="operator">)</span><span class="variable-name"> </span><span class="operator">(</span><span class="variable-name">nt2</span><span class="operator">,</span><span class="variable-name">l2</span><span class="operator">,</span><span class="variable-name">h2</span><span class="operator">)</span> <span class="operator">=</span> <span class="operator">(</span>
-    <span class="keyword">assert</span> <span class="operator">((</span>l1<span class="operator">,</span>h1<span class="operator">)</span> <span class="operator">=</span> <span class="operator">(</span>l2<span class="operator">,</span>h2<span class="operator">));</span> <span class="comment-delimiter">(* </span><span class="comment">contexts are normalized to a particular span </span><span class="comment-delimiter">*)</span>
-    <span class="module">Pervasives.</span>compare nt1 nt2<span class="operator">)</span>
-
-  <span class="comment-delimiter">(* </span><span class="comment">when parsing the input between l and h, the only part of the
-     context that matters are those entries (nt,(l',h')) st (l',h') =
-     (l,h); so there is a notion of a normalized context (important
-     for memoization) </span><span class="comment-delimiter">*)</span>
-
-  <span class="governing">let</span> <span class="function-name">normalize</span><span class="variable-name"> c </span><span class="operator">(</span><span class="variable-name">l</span><span class="operator">,</span><span class="variable-name">h</span><span class="operator">)</span> <span class="operator">=</span> <span class="operator">(</span>
-    c <span class="operator">|&gt;</span> <span class="module">List.</span>filter <span class="operator">(</span><span class="keyword">fun</span> <span class="operator">(</span><span class="variable-name">nt'</span><span class="operator">,</span><span class="variable-name">l'</span><span class="operator">,</span><span class="variable-name">h'</span><span class="operator">)</span> <span class="operator">-&gt;</span> <span class="operator">(</span>l'<span class="operator">,</span>h'<span class="operator">)</span> <span class="operator">=</span> <span class="operator">(</span>l<span class="operator">,</span>h<span class="operator">))</span> <span class="operator">)</span>
-
-  <span class="comment-delimiter">(* </span><span class="comment">our contexts are sorted; we need insertion into a sorted list; we expect no duplicates  </span><span class="comment-delimiter">*)</span>
-  <span class="governing">let</span> <span class="governing">rec</span> <span class="function-name">insert</span><span class="variable-name"> </span><span class="operator">~</span><span class="variable-name">cmp elt lst</span> <span class="operator">=</span> <span class="operator">(</span>
-    <span class="keyword">match</span> lst <span class="keyword">with</span>
-    <span class="operator">|</span> <span class="operator">[]</span> <span class="operator">-&gt;</span> <span class="operator">[</span>elt<span class="operator">]</span>
-    <span class="operator">|</span> x<span class="operator">::</span>xs <span class="operator">-&gt;</span> 
-      cmp elt x <span class="operator">|&gt;</span> <span class="keyword">fun</span> <span class="variable-name">r</span> <span class="operator">-&gt;</span> 
-      <span class="keyword">match</span> <span class="operator">()</span> <span class="keyword">with</span>
-      <span class="operator">|</span> _ <span class="keyword">when</span> r <span class="operator">&lt;</span> 0 <span class="operator">-&gt;</span> 
-        <span class="comment-delimiter">(* </span><span class="comment">elt &lt; x </span><span class="comment-delimiter">*)</span>
-        elt <span class="operator">::</span> lst 
-      <span class="operator">|</span> _ <span class="keyword">when</span> r <span class="operator">=</span> 0 <span class="operator">-&gt;</span> 
-        <span class="builtin">failwith</span> __LOC__ <span class="comment-delimiter">(* </span><span class="comment">no duplicates </span><span class="comment-delimiter">*)</span>
-      <span class="operator">|</span> _ <span class="operator">-&gt;</span> x <span class="operator">::</span> insert <span class="operator">~</span>cmp elt xs<span class="operator">)</span>
-
-  <span class="governing">let</span> <span class="function-name">update</span><span class="variable-name"> c </span><span class="operator">(</span><span class="variable-name">nt</span><span class="operator">,</span><span class="variable-name">l</span><span class="operator">,</span><span class="variable-name">h</span><span class="operator">)</span> <span class="operator">=</span> <span class="operator">(</span>
-    <span class="governing">let</span> <span class="variable-name">c'</span> <span class="operator">=</span> normalize c <span class="operator">(</span>l<span class="operator">,</span>h<span class="operator">)</span> <span class="governing">in</span>
-    <span class="operator">(</span>insert <span class="operator">~</span>cmp <span class="operator">(</span>nt<span class="operator">,</span>l<span class="operator">,</span>h<span class="operator">)</span> c'<span class="operator">))</span>
-
-  <span class="governing">let</span> <span class="function-name">contains</span><span class="variable-name"> c </span><span class="operator">(</span><span class="variable-name">nt</span><span class="operator">,</span><span class="variable-name">l</span><span class="operator">,</span><span class="variable-name">h</span><span class="operator">)</span> <span class="operator">=</span> <span class="operator">(</span><span class="module">List.</span>mem <span class="operator">(</span>nt<span class="operator">,</span>l<span class="operator">,</span>h<span class="operator">)</span> c<span class="operator">)</span>
+<span class="governing">let</span> <span class="function-name">contains</span><span class="variable-name"> </span><span class="operator">~</span><span class="variable-name">ctxt </span><span class="operator">(</span><span class="variable-name">nt</span><span class="operator">,</span><span class="variable-name">l</span><span class="operator">,</span><span class="variable-name">h</span><span class="operator">)</span> <span class="operator">=</span> 
+  ctxt.span <span class="operator">=</span> <span class="operator">(</span>l<span class="operator">,</span>h<span class="operator">)</span> <span class="operator">&amp;&amp;</span> <span class="module">List.</span>mem nt ctxt.nts
 
 
-  <span class="comment-delimiter">(* </span><span class="comment">remember what NT is called on what input </span><span class="comment-delimiter">*)</span>
-  <span class="comment-delimiter">(* </span><span class="comment">nonterm -&gt; 'a parser_ -&gt; 'a parser_ </span><span class="comment-delimiter">*)</span>
-  <span class="comment-delimiter">(* </span><span class="comment">was update_lctxt </span><span class="comment-delimiter">*)</span>
-  <span class="governing">let</span> <span class="function-name">update_p</span><span class="variable-name"> nt p</span> <span class="operator">=</span> <span class="operator">(</span><span class="keyword">fun</span> <span class="variable-name">i0</span> <span class="operator">-&gt;</span>
-      p <span class="operator">{</span> i0 <span class="keyword">with</span> ctxt<span class="operator">=(</span>update i0.ctxt <span class="operator">(</span>nt<span class="operator">,</span>i0.ss.i_<span class="operator">,</span>i0.ss.j_<span class="operator">))</span> <span class="operator">})</span>
+<span class="comment-delimiter">(* </span><span class="comment">remember what NT is called on what input </span><span class="comment-delimiter">*)</span>
+<span class="comment-delimiter">(* </span><span class="comment">nonterm -&gt; 'a parser_ -&gt; 'a parser_ </span><span class="comment-delimiter">*)</span>
+<span class="comment-delimiter">(* </span><span class="comment">was update_lctxt </span><span class="comment-delimiter">*)</span>
+<span class="governing">let</span> <span class="function-name">update_p</span><span class="variable-name"> nt p</span> <span class="operator">=</span> <span class="keyword">fun</span> <span class="variable-name">i0</span> <span class="operator">-&gt;</span>
+  p <span class="operator">{</span> i0 <span class="keyword">with</span> ctxt<span class="operator">=(</span>update i0.ctxt <span class="operator">(</span>nt<span class="operator">,</span>i0.ss.i_<span class="operator">,</span>i0.ss.j_<span class="operator">))</span> <span class="operator">}</span>
 
-  <span class="governing">let</span> <span class="operator">(</span><span class="variable-name">_</span><span class="operator">:</span><span class="variable-name">nonterm </span><span class="operator">-&gt;</span><span class="variable-name"> 'b parser_ </span><span class="operator">-&gt;</span><span class="variable-name"> 'b parser_</span><span class="operator">)</span> <span class="operator">=</span> update_p
+<span class="governing">let</span> <span class="operator">(</span><span class="variable-name">_</span><span class="operator">:</span><span class="variable-name">nonterm </span><span class="operator">-&gt;</span><span class="variable-name"> 'b parser_ </span><span class="operator">-&gt;</span><span class="variable-name"> 'b parser_</span><span class="operator">)</span> <span class="operator">=</span> update_p
 
-  <span class="governing">let</span> <span class="function-name">check</span><span class="variable-name"> nt p</span> <span class="operator">=</span> <span class="operator">(</span><span class="keyword">fun</span> <span class="variable-name">i0</span> <span class="operator">-&gt;</span>
-      <span class="governing">let</span> <span class="variable-name">should_trim</span> <span class="operator">=</span> contains i0.ctxt <span class="operator">(</span>nt<span class="operator">,</span>i0.ss.i_<span class="operator">,</span>i0.ss.j_<span class="operator">)</span> <span class="governing">in</span>
-      <span class="keyword">if</span> should_trim <span class="operator">&amp;&amp;</span> <span class="operator">(</span>i0.ss<span class="operator">|&gt;</span>sublen <span class="operator">=</span> 0<span class="operator">)</span> <span class="keyword">then</span>
-        <span class="operator">[]</span>
-      <span class="keyword">else</span> <span class="keyword">if</span> should_trim <span class="keyword">then</span>
-        <span class="operator">(</span>ignr_last <span class="operator">(</span>update_p nt p<span class="operator">))</span> i0
-      <span class="keyword">else</span>
-        <span class="operator">(</span>update_p nt p<span class="operator">)</span> i0<span class="operator">)</span>
+<span class="governing">let</span> <span class="function-name">check</span><span class="variable-name"> nt p</span> <span class="operator">=</span> <span class="keyword">fun</span> <span class="variable-name">i0</span> <span class="operator">-&gt;</span>
+  <span class="governing">let</span> <span class="variable-name">should_trim</span> <span class="operator">=</span> contains i0.ctxt <span class="operator">(</span>nt<span class="operator">,</span>i0.ss.i_<span class="operator">,</span>i0.ss.j_<span class="operator">)</span> <span class="governing">in</span>
+  <span class="keyword">if</span> should_trim <span class="operator">&amp;&amp;</span> <span class="operator">(</span>i0.ss<span class="operator">|&gt;</span>sublen <span class="operator">=</span> 0<span class="operator">)</span> <span class="keyword">then</span>
+    <span class="operator">[]</span>
+  <span class="keyword">else</span> <span class="keyword">if</span> should_trim <span class="keyword">then</span>
+    ignr_last <span class="operator">(</span>update_p nt p<span class="operator">)</span> i0
+  <span class="keyword">else</span>
+    <span class="operator">(</span>update_p nt p<span class="operator">)</span> i0
 
-  <span class="governing">let</span> <span class="operator">(</span><span class="variable-name">_</span><span class="operator">:</span><span class="variable-name">nonterm </span><span class="operator">-&gt;</span><span class="variable-name"> 'b parser_ </span><span class="operator">-&gt;</span><span class="variable-name"> 'b parser_</span><span class="operator">)</span> <span class="operator">=</span> check
+<span class="governing">let</span> <span class="operator">(</span><span class="variable-name">_</span><span class="operator">:</span><span class="variable-name">nonterm </span><span class="operator">-&gt;</span><span class="variable-name"> 'b parser_ </span><span class="operator">-&gt;</span><span class="variable-name"> 'b parser_</span><span class="operator">)</span> <span class="operator">=</span> check
 
-<span class="governing">end</span>
-<span class="governing">include</span> <span class="module">Context</span>
 
 <span class="comment-delimiter">(* </span><span class="comment">memoization support ---------------------------------------- </span><span class="comment-delimiter">*)</span>
 
@@ -281,23 +265,23 @@ span.comment-delimiter a { color: #b22222;  font-family: Ubuntu Mono;  font-stre
 <span class="governing">let</span> <span class="function-name">hashkey_of_input</span><span class="variable-name"> i0</span> <span class="operator">=</span> <span class="operator">(</span>i0.ctxt<span class="operator">,</span>i0.ss.i_<span class="operator">,</span>i0.ss.j_<span class="operator">)</span>
 
 <span class="comment-delimiter">(* </span><span class="comment">generic memo function </span><span class="comment-delimiter">*)</span>
-<span class="governing">let</span> <span class="function-name">memo</span><span class="variable-name"> tbl key_of_input f i</span> <span class="operator">=</span> <span class="operator">(</span>
+<span class="governing">let</span> <span class="function-name">memo</span><span class="variable-name"> tbl key_of_input f i</span> <span class="operator">=</span> 
   key_of_input i <span class="operator">|&gt;</span> <span class="keyword">fun</span> <span class="variable-name">k</span> <span class="operator">-&gt;</span> 
   <span class="keyword">if</span> <span class="operator">(</span><span class="module">Hashtbl.</span>mem tbl k<span class="operator">)</span> <span class="keyword">then</span> 
     <span class="module">Hashtbl.</span>find tbl k
-  <span class="keyword">else</span>
+  <span class="keyword">else</span> <span class="operator">(</span>
     <span class="governing">let</span> <span class="variable-name">v</span> <span class="operator">=</span> f i <span class="governing">in</span>
-    <span class="governing">let</span> <span class="variable-name">_</span> <span class="operator">=</span> <span class="module">Hashtbl.</span>add tbl k v <span class="governing">in</span>
+    <span class="module">Hashtbl.</span>add tbl k v<span class="operator">;</span>
     v<span class="operator">)</span>
 
 
 <span class="comment-delimiter">(* </span><span class="comment">convenience ---------------------------------------- </span><span class="comment-delimiter">*)</span>
 
 <span class="comment-delimiter">(* </span><span class="comment">return those results for which entire input is parsed </span><span class="comment-delimiter">*)</span>
-<span class="governing">let</span> <span class="variable-name">run_parser</span> <span class="operator">:</span> <span class="type">'b parser_ </span><span class="operator">-&gt;</span><span class="type"> string </span><span class="operator">-&gt;</span><span class="type"> 'b list </span><span class="operator">=</span> <span class="operator">(</span>
+<span class="governing">let</span> <span class="variable-name">run_parser</span> <span class="operator">:</span> <span class="type">'b parser_ </span><span class="operator">-&gt;</span><span class="type"> string </span><span class="operator">-&gt;</span><span class="type"> 'b list </span><span class="operator">=</span> 
   <span class="keyword">fun</span> <span class="variable-name">p s</span> <span class="operator">-&gt;</span> 
     s <span class="operator">|&gt;</span> mk_substring <span class="operator">|&gt;</span> to_input <span class="operator">|&gt;</span> p <span class="operator">|&gt;</span> 
-    <span class="module">List.</span>filter <span class="operator">(</span><span class="keyword">fun</span> <span class="operator">(</span><span class="variable-name">_</span><span class="operator">,</span><span class="variable-name">s</span><span class="operator">)</span> <span class="operator">-&gt;</span> s<span class="operator">|&gt;</span>sublen<span class="operator">=</span>0<span class="operator">)</span> <span class="operator">|&gt;</span> <span class="module">List.</span>map fst<span class="operator">)</span>
+    <span class="module">List.</span>filter <span class="operator">(</span><span class="keyword">fun</span> <span class="operator">(</span><span class="variable-name">_</span><span class="operator">,</span><span class="variable-name">s</span><span class="operator">)</span> <span class="operator">-&gt;</span> s<span class="operator">|&gt;</span>sublen<span class="operator">=</span>0<span class="operator">)</span> <span class="operator">|&gt;</span> <span class="module">List.</span>map fst
 
 </pre>
 
