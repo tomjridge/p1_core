@@ -25,6 +25,6 @@ doc:
 	ocamlfind ocamldoc $$PKGS $$WARN -html -d ../docs/ocamldoc *.ml
 
 clean:
-	rm -f *.{cmi,cmo,cmx,o}
+	rm -f *.{cmi,cmo,cmx,o} *.native META
 
 FORCE:
