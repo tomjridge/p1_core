@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="next" href="P1_examples.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="P1_core" rel="Chapter" href="P1_core.html">
+<link title="P1_examples" rel="Chapter" href="P1_examples.html"><title>P1_core</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="P1_examples.html" title="P1_examples">Next</a>
+</div>
+<h1>Module <a href="type_P1_core.html">P1_core</a></h1>
+
+<pre><span class="keyword">module</span> P1_core: <code class="code">sig</code> <a href="P1_core.html">..</a> <code class="code">end</code></pre><hr width="100%">
+
+<pre><span id="VALsublen"><span class="keyword">val</span> sublen</span> : <code class="type">'a Tjr_substring.poly_substring -> int</code></pre>
+<pre><span id="VALdec_j"><span class="keyword">val</span> dec_j</span> : <code class="type">'a Tjr_substring.poly_substring -> 'a Tjr_substring.poly_substring</code></pre>
+<pre><span id="VALinc_j"><span class="keyword">val</span> inc_j</span> : <code class="type">'a Tjr_substring.poly_substring -> 'a Tjr_substring.poly_substring</code></pre>
+<pre><span id="TYPEss"><span class="keyword">type</span> <code class="type"></code>ss</span> = <code class="type">Tjr_substring.substring_</code> </pre>
+
+
+<pre><span id="TYPEnonterm"><span class="keyword">type</span> <code class="type"></code>nonterm</span> = <code class="type">string</code> </pre>
+
+
+<pre><code><span id="TYPEctxt"><span class="keyword">type</span> <code class="type"></code>ctxt</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTctxt.nts">nts</span>&nbsp;: <code class="type"><a href="P1_core.html#TYPEnonterm">nonterm</a> list</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTctxt.span">span</span>&nbsp;: <code class="type">int * int</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><span id="VALempty_ctxt"><span class="keyword">val</span> empty_ctxt</span> : <code class="type"><a href="P1_core.html#TYPEctxt">ctxt</a></code></pre>
+<pre><code><span id="TYPEinput"><span class="keyword">type</span> <code class="type"></code>input</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinput.ctxt">ctxt</span>&nbsp;: <code class="type"><a href="P1_core.html#TYPEctxt">ctxt</a></code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinput.ss">ss</span>&nbsp;: <code class="type">Tjr_substring.substring_</code>;</code></td>
+
+</tr></table>
+}
+
+
+
+<pre><span id="VALto_input"><span class="keyword">val</span> to_input</span> : <code class="type">Tjr_substring.substring_ -> <a href="P1_core.html#TYPEinput">input</a></code></pre>
+<pre><span id="VALlift"><span class="keyword">val</span> lift</span> : <code class="type">(Tjr_substring.substring_ -> Tjr_substring.substring_) -><br>       <a href="P1_core.html#TYPEinput">input</a> -> <a href="P1_core.html#TYPEinput">input</a></code></pre>
+<pre><span id="TYPEresult"><span class="keyword">type</span> <code class="type">'b</code> result</span> = <code class="type">('b * <a href="P1_core.html#TYPEss">ss</a>) list</code> </pre>
+
+
+<pre><span id="TYPEparser_"><span class="keyword">type</span> <code class="type">'b</code> parser_</span> = <code class="type"><a href="P1_core.html#TYPEinput">input</a> -> 'b <a href="P1_core.html#TYPEresult">result</a></code> </pre>
+
+
+<pre><span id="VALunique"><span class="keyword">val</span> unique</span> : <code class="type">'a list -> 'a list</code></pre>
+<pre><span id="VAL(>>)"><span class="keyword">val</span> (&gt;&gt;)</span> : <code class="type">('a -> ('b * 'c) list) -> ('b -> 'd) -> 'a -> ('d * 'c) list</code></pre>
+<pre><span id="VAL(|||)"><span class="keyword">val</span> (|||)</span> : <code class="type">('a -> 'b list) -> ('a -> 'b list) -> 'a -> 'b list</code></pre>
+<pre><span id="VAL( **> )"><span class="keyword">val</span> ( **&gt; )</span> : <code class="type">(<a href="P1_core.html#TYPEinput">input</a> -> ('a * Tjr_substring.substring_) list) -><br>       (<a href="P1_core.html#TYPEinput">input</a> -> ('b * 'c) list) -> <a href="P1_core.html#TYPEinput">input</a> -> (('a * 'b) * 'c) list</code></pre>
+<pre><span id="VALignr_last"><span class="keyword">val</span> ignr_last</span> : <code class="type">(<a href="P1_core.html#TYPEinput">input</a> -> ('a * 'b Tjr_substring.poly_substring) list) -><br>       <a href="P1_core.html#TYPEinput">input</a> -> ('a * 'b Tjr_substring.poly_substring) list</code></pre>
+<pre><span id="VALupdate"><span class="keyword">val</span> update</span> : <code class="type">ctxt:<a href="P1_core.html#TYPEctxt">ctxt</a> -> <a href="P1_core.html#TYPEnonterm">nonterm</a> * int * int -> <a href="P1_core.html#TYPEctxt">ctxt</a></code></pre>
+<pre><span id="VALcontains"><span class="keyword">val</span> contains</span> : <code class="type">ctxt:<a href="P1_core.html#TYPEctxt">ctxt</a> -> <a href="P1_core.html#TYPEnonterm">nonterm</a> * int * int -> bool</code></pre>
+<pre><span id="VALupdate_p"><span class="keyword">val</span> update_p</span> : <code class="type"><a href="P1_core.html#TYPEnonterm">nonterm</a> -> (<a href="P1_core.html#TYPEinput">input</a> -> 'a) -> <a href="P1_core.html#TYPEinput">input</a> -> 'a</code></pre>
+<pre><span id="VALcheck"><span class="keyword">val</span> check</span> : <code class="type"><a href="P1_core.html#TYPEnonterm">nonterm</a> -><br>       (<a href="P1_core.html#TYPEinput">input</a> -> ('a * 'b Tjr_substring.poly_substring) list) -><br>       <a href="P1_core.html#TYPEinput">input</a> -> ('a * 'b Tjr_substring.poly_substring) list</code></pre>
+<pre><span id="TYPEhashkey"><span class="keyword">type</span> <code class="type"></code>hashkey</span> = <code class="type"><a href="P1_core.html#TYPEctxt">ctxt</a> * int * int</code> </pre>
+
+
+<pre><span id="VALhashkey_of_input"><span class="keyword">val</span> hashkey_of_input</span> : <code class="type"><a href="P1_core.html#TYPEinput">input</a> -> <a href="P1_core.html#TYPEctxt">ctxt</a> * int * int</code></pre>
+<pre><span id="VALmemo"><span class="keyword">val</span> memo</span> : <code class="type">('a, 'b) Hashtbl.t -> ('c -> 'a) -> ('c -> 'b) -> 'c -> 'b</code></pre>
+<pre><span id="VALrun_parser"><span class="keyword">val</span> run_parser</span> : <code class="type">'b <a href="P1_core.html#TYPEparser_">parser_</a> -> string -> 'b list</code></pre></body></html>
