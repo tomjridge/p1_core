@@ -1,10 +1,11 @@
 (* NOTE this is less general than it could be: no need to assume we
    are parsing strings *)
 
+(* substrings ------------------------------------------------------- *)
+
 open Tjr_substring
 
 let sublen = Tjr_substring.length
-
 
 let dec_j s = 
   assert (sublen s > 0);
@@ -13,27 +14,37 @@ let dec_j s =
 let inc_j s = {s with j_=s.j_ + 1}
 
 
-type nonterm = string
-
-
-module Context' = struct
-  (* ctxt is a list of (nt,i,j) recording that we are already parsing nt for span i,j *)
-  type elt = (nonterm * int * int)  (* FIXME really need an extra arg int for the string *)
-  type ctxt = elt list 
-  let empty = []
-end
-include Context'
-
-(* type 'a s = 'a Substring.t *)
 type ss = substring_
 
 
+
+(* nonterm ---------------------------------------------------------- *)
+
+type nonterm = string
+
+
+(* contexts --------------------------------------------------------- *)
+
+(* ctxt is a list of (nt,i,j) recording that we are already parsing nt
+   for span i,j; since in a ctxt all i,j are equal, we can just record a
+   list of nts with the span i,j *)
+type ctxt = { nts: nonterm list; span: int * int }
+
+let empty_ctxt = { nts=[]; span=(0,max_int) }  (* FIXME max_int a bit ugly *)
+
+
+
+(* inputs ----------------------------------------------------------- *)
+
 type input = { ctxt:ctxt; ss : substring_ }
 
-let to_input ss = { ctxt=empty; ss }
+let to_input ss = { ctxt=empty_ctxt; ss }
 
+(* FIXME needed? *)
 let lift f i = {i with ss=(f i.ss) } 
 
+
+(* results and parsers ---------------------------------------------- *)
 
 type 'b result = ('b * ss) list
 
@@ -78,66 +89,41 @@ let (_: 'b parser_ -> 'b parser_) = ignr_last
 
 
 
-(* context ---------------------------------------- *)
+(* more context ------------------------------------ *)
 
-module Context = struct
+let update ~ctxt (nt,l,h) = 
+  let (l',h') = ctxt.span in
+  assert(l>=l' && h <= h');
+  match (l,h) = (l',h') with
+  | true ->
+    assert(not (List.mem nt ctxt.nts));
+    { ctxt with nts=nt::ctxt.nts }
+  | false ->
+    { nts=[nt]; span=(l,h) }
 
-  (* debug version; assumes s1 = s2 (since the only part of the
-     context that matters is...) *)
-  let cmp (nt1,l1,h1) (nt2,l2,h2) = (
-    assert ((l1,h1) = (l2,h2)); (* contexts are normalized to a particular span *)
-    Pervasives.compare nt1 nt2)
-
-  (* when parsing the input between l and h, the only part of the
-     context that matters are those entries (nt,(l',h')) st (l',h') =
-     (l,h); so there is a notion of a normalized context (important
-     for memoization) *)
-
-  let normalize c (l,h) = (
-    c |> List.filter (fun (nt',l',h') -> (l',h') = (l,h)) )
-
-  (* our contexts are sorted; we need insertion into a sorted list; we expect no duplicates  *)
-  let rec insert ~cmp elt lst = (
-    match lst with
-    | [] -> [elt]
-    | x::xs -> 
-      cmp elt x |> fun r -> 
-      match () with
-      | _ when r < 0 -> 
-        (* elt < x *)
-        elt :: lst 
-      | _ when r = 0 -> 
-        failwith __LOC__ (* no duplicates *)
-      | _ -> x :: insert ~cmp elt xs)
-
-  let update c (nt,l,h) = (
-    let c' = normalize c (l,h) in
-    (insert ~cmp (nt,l,h) c'))
-
-  let contains c (nt,l,h) = (List.mem (nt,l,h) c)
+let contains ~ctxt (nt,l,h) = 
+  ctxt.span = (l,h) && List.mem nt ctxt.nts
 
 
-  (* remember what NT is called on what input *)
-  (* nonterm -> 'a parser_ -> 'a parser_ *)
-  (* was update_lctxt *)
-  let update_p nt p = (fun i0 ->
-      p { i0 with ctxt=(update i0.ctxt (nt,i0.ss.i_,i0.ss.j_)) })
+(* remember what NT is called on what input *)
+(* nonterm -> 'a parser_ -> 'a parser_ *)
+(* was update_lctxt *)
+let update_p nt p = fun i0 ->
+  p { i0 with ctxt=(update i0.ctxt (nt,i0.ss.i_,i0.ss.j_)) }
 
-  let (_:nonterm -> 'b parser_ -> 'b parser_) = update_p
+let (_:nonterm -> 'b parser_ -> 'b parser_) = update_p
 
-  let check nt p = (fun i0 ->
-      let should_trim = contains i0.ctxt (nt,i0.ss.i_,i0.ss.j_) in
-      if should_trim && (i0.ss|>sublen = 0) then
-        []
-      else if should_trim then
-        (ignr_last (update_p nt p)) i0
-      else
-        (update_p nt p) i0)
+let check nt p = fun i0 ->
+  let should_trim = contains i0.ctxt (nt,i0.ss.i_,i0.ss.j_) in
+  if should_trim && (i0.ss|>sublen = 0) then
+    []
+  else if should_trim then
+    ignr_last (update_p nt p) i0
+  else
+    (update_p nt p) i0
 
-  let (_:nonterm -> 'b parser_ -> 'b parser_) = check
+let (_:nonterm -> 'b parser_ -> 'b parser_) = check
 
-end
-include Context
 
 (* memoization support ---------------------------------------- *)
 
@@ -148,21 +134,21 @@ type hashkey = (ctxt * int * int)
 let hashkey_of_input i0 = (i0.ctxt,i0.ss.i_,i0.ss.j_)
 
 (* generic memo function *)
-let memo tbl key_of_input f i = (
+let memo tbl key_of_input f i = 
   key_of_input i |> fun k -> 
   if (Hashtbl.mem tbl k) then 
     Hashtbl.find tbl k
-  else
+  else (
     let v = f i in
-    let _ = Hashtbl.add tbl k v in
+    Hashtbl.add tbl k v;
     v)
 
 
 (* convenience ---------------------------------------- *)
 
 (* return those results for which entire input is parsed *)
-let run_parser : 'b parser_ -> string -> 'b list = (
+let run_parser : 'b parser_ -> string -> 'b list = 
   fun p s -> 
     s |> mk_substring |> to_input |> p |> 
-    List.filter (fun (_,s) -> s|>sublen=0) |> List.map fst)
+    List.filter (fun (_,s) -> s|>sublen=0) |> List.map fst
 
