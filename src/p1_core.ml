@@ -20,6 +20,7 @@ type ss = substring_
 
 (* nonterm ---------------------------------------------------------- *)
 
+(* FIXME prefer to keep this abstract *)
 type nonterm = string
 
 
@@ -39,6 +40,8 @@ let empty_ctxt = { nts=[]; span=(0,max_int) }  (* FIXME max_int a bit ugly *)
 type input = { ctxt:ctxt; ss : substring_ }
 
 let to_input ss = { ctxt=empty_ctxt; ss }
+
+let string_to_input s = s |> Tjr_substring.mk_substring |> to_input
 
 (* FIXME needed? *)
 let lift f i = {i with ss=(f i.ss) } 
