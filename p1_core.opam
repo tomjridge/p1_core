@@ -10,10 +10,11 @@ bug-reports: "https://github.com/tomjridge/p1_core/issues"
 dev-repo: "https://github.com/tomjridge/p1_core.git"
 
 build: [
-  [make "build"]
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
 ]
-install: [make "install"]
-remove: ["ocamlfind" "remove" "p1_core"]
+
+# remove: ["ocamlfind" "remove" "p1_core"]
 
 depends: [
   "tjr_lib"
