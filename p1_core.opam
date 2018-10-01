@@ -10,7 +10,7 @@ bug-reports: "https://github.com/tomjridge/p1_core/issues"
 dev-repo: "https://github.com/tomjridge/p1_core.git"
 
 build: [
-  [make "all"]
+  [make "build"]
 ]
 install: [make "install"]
 remove: ["ocamlfind" "remove" "p1_core"]

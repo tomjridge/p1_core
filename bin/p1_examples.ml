@@ -7,7 +7,7 @@ open Tjr_list.List_as_set
 let start_stop s f = 
   let t1 = Sys.time () in
   print_string ("Start "^s^" ...");
-  f();
+  let _ = f() in
   let t2 = Sys.time () in
   print_endline ("...stop in "^(string_of_float (t2 -. t1))^" seconds");
   ()
@@ -39,7 +39,7 @@ let rec _E i =
     ||| (eps >> fun _ -> 0)) i
 
 let f () = "111" |> run_parser _E 
-let _ = start_stop "example muv" f
+let _ = start_stop "example muv" f |> fun _ -> ()
 
 (*
 let _ = assert (

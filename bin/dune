@@ -1,0 +1,9 @@
+(executables
+  (names p1_examples)
+  (libraries p1_core)
+)
+
+; (rule
+;   (targets all.touch)
+;   (deps (glob_files *.exe))
+;   (action (write-file all.touch "this file records that all exes have been built")) )

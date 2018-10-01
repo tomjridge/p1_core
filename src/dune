@@ -1,0 +1,9 @@
+; (include ../dune) automatically included?
+
+(library
+  (public_name p1_core)
+  (wrapped false)
+;  (preprocess (pps ppx_deriving_yojson))
+  (libraries tjr_lib))
+
+; (include_subdirs unqualified)
