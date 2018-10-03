@@ -10,7 +10,7 @@ bug-reports: "https://github.com/tomjridge/p1_core/issues"
 dev-repo: "https://github.com/tomjridge/p1_core.git"
 
 build: [
-  ["dune" "subst"] {pinned}
+#  ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
 ]
 

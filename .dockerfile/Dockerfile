@@ -23,8 +23,12 @@ RUN opam update
 
 RUN eval `opam config env` && opam install dune
 
+RUN echo rebuild from here ...
+
 RUN eval `opam config env` && opam pin add tjr_lib_core https://github.com/tomjridge/tjr_lib.git
 RUN eval `opam config env` && opam pin add tjr_lib https://github.com/tomjridge/tjr_lib.git
+
+RUN echo rebuild from here ....
 
 RUN git clone https://github.com/tomjridge/p1_core.git
 

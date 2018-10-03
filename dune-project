@@ -1,2 +1,2 @@
 (lang dune 1.1)
-(name xxx_xxx)  ; ignored?
+(name p1_core)  ; ignored? seems to be used for dune subst
