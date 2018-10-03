@@ -2,12 +2,28 @@
 
 # FROM ocaml/opam:ubuntu - latest doesn't work due to problems with ppx_deriving deps
 # 17.04 doesn't work due to missing archives at ubuntu? or stale packages info?
-FROM ocaml/opam:ubuntu-16.04_ocaml-4.04.2
-# RUN apt-get -y update
+# FROM ocaml/opam:ubuntu-16.04_ocaml-4.04.2
+
+FROM ocaml/opam2:ubuntu
+
+USER root
+RUN apt-get -y update
+RUN apt-get install -y curl
+RUN apt-get install -y gcc
+RUN apt-get install -y bzip2
+RUN apt-get install -y wget
+RUN apt-get install -y sudo
+RUN apt-get install -y unzip m4
+RUN apt-get install -y time
+USER opam
+
 
 RUN opam list
 RUN opam update
 
+RUN eval `opam config env` && opam install dune
+
+RUN eval `opam config env` && opam pin add tjr_lib_core https://github.com/tomjridge/tjr_lib.git
 RUN eval `opam config env` && opam pin add tjr_lib https://github.com/tomjridge/tjr_lib.git
 
 RUN git clone https://github.com/tomjridge/p1_core.git
