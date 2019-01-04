@@ -1,57 +1,48 @@
 (* NOTE this is less general than it could be: no need to assume we
    are parsing strings *)
 
-(* substrings ------------------------------------------------------- *)
+open Tjr_monad.Types
 
-open Tjr_substring
+(** Dummy type, to represent sequencing and to allow rec bindings with
+   monad *)
+type xx
 
-let sublen = Tjr_substring.length
+(** A parser returns a list of results FIXME but if we have a list of
+   results, then we can't just record a single state of the context in
+   the monad; thus, for a list of results we also need to explicitly
+   return the parse state with each result... alternatively we could
+   hide this altogether and instead maintain everything inside the
+   monad, ie ('a,'t) m somehow hides the fact that we have a list; the
+   bind would then need to be more complicated 
 
-let dec_j s = 
-  assert (sublen s > 0);
-  {s with j_=s.j_ - 1}
-
-let inc_j s = {s with j_=s.j_ + 1}
-
-
-type ss = substring_
-
+    in this case, we would not deal with list ops explicitly-  they would be hidden by the monad
+*)
+type ('a,'t) parser_ = xx -> ('a list,'t) m
 
 
 (* nonterm ---------------------------------------------------------- *)
 
-(* FIXME prefer to keep this abstract *)
-type nonterm = string
-
+(* use type var 'nt *)
 
 (* contexts --------------------------------------------------------- *)
 
-(* ctxt is a list of (nt,i,j) recording that we are already parsing nt
-   for span i,j; since in a ctxt all i,j are equal, we can just record a
-   list of nts with the span i,j *)
-type ctxt = { nts: nonterm list; span: int * int }
+module Ctxt_type = struct
 
-let empty_ctxt = { nts=[]; span=(0,max_int) }  (* FIXME max_int a bit ugly *)
+  (* ctxt is a list of (nt,i,j) recording that we are already parsing nt
+     for span i,j; since in a ctxt all i,j are equal, we can just record a
+     list of nts with the span i,j *)
+  type 'nt ctxt = { nts: 'nt list; i_:int; j_:int }
 
+  let empty_ctxt = { nts=[]; i_=0; j_=max_int }  (* FIXME max_int a bit ugly *)
+
+end
+open Ctxt_type
 
 
 (* inputs ----------------------------------------------------------- *)
 
-type input = { ctxt:ctxt; ss : substring_ }
-
-let to_input ss = { ctxt=empty_ctxt; ss }
-
-let string_to_input s = s |> Tjr_substring.mk_substring |> to_input
-
-(* FIXME needed? *)
-let lift f i = {i with ss=(f i.ss) } 
-
-
-(* results and parsers ---------------------------------------------- *)
-
-type 'b result = ('b * ss) list
-
-type 'b parser_ = input -> 'b result
+(* we keep the input type abstract, but we assume that there is some
+   ctxt obtainable from the monad *)
 
 
 
@@ -61,9 +52,27 @@ type 'b parser_ = input -> 'b result
    depends on the notion of context. Context comes later, and is
    modularly combined with the following. *)
 
-let unique = Tjr_list.unique
+let mk_combs ~monad_ops =
+  let ( >>= ) = monad_ops.bind in
+  let return = monad_ops.return in
+  let seq p1 p2 = 
+    fun xx -> 
+      p1 xx >>= fun as_ ->
+      (* NOTE we may want to allow p2 to be parameterized by the
+         result of p1... in fact we likely do; in which case the result is a list of bs *)
+      return (List.map (fun a -> p2 a xx) as_)  >>= fun bs -> 
+      return (List.concat bs)
+  in
+  let alt p1 p2 = 
+    fun xx ->
+      p1 xx >>= fun as_ ->
+      p2 xx >>= fun bs ->
+      return 
+      
+    
 
-let ( >> ) p f = (fun i0 ->
+let ( >> ) p f = fun _ -> 
+  
     i0 |> p |> List.map (fun (e,s) -> (f e, s)) |> unique)
 
 let (_: 'b parser_ -> ('b -> 'c) -> 'c parser_) = ( >> )
