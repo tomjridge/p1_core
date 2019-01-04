@@ -3,3 +3,4 @@
 /bin/.merlin
 /p1_core.install
 /src/.merlin
+/dune-project
