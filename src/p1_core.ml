@@ -3,9 +3,15 @@
 
 (* substrings ------------------------------------------------------- *)
 
-open Tjr_substring
+type substring_ = { 
+  s_:string;
+  i_:int;
+  j_:int;
+}
 
-let sublen = Tjr_substring.length
+let mk_substring s = { s_=s; i_=0; j_=String.length s }
+
+let sublen ss = ss.j_ - ss.i_
 
 let dec_j s = 
   assert (sublen s > 0);
@@ -41,7 +47,7 @@ type input = { ctxt:ctxt; ss : substring_ }
 
 let to_input ss = { ctxt=empty_ctxt; ss }
 
-let string_to_input s = s |> Tjr_substring.mk_substring |> to_input
+let string_to_input s = s |> mk_substring |> to_input
 
 (* FIXME needed? *)
 let lift f i = {i with ss=(f i.ss) } 
@@ -61,7 +67,7 @@ type 'b parser_ = input -> 'b result
    depends on the notion of context. Context comes later, and is
    modularly combined with the following. *)
 
-let unique = Tjr_list.unique
+let unique xs = List.sort_uniq Pervasives.compare xs
 
 let ( >> ) p f = (fun i0 ->
     i0 |> p |> List.map (fun (e,s) -> (f e, s)) |> unique)

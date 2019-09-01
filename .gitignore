@@ -1,6 +1,2 @@
-/META
-/src/META
-/bin/.merlin
-/p1_core.install
-/src/.merlin
+.merlin
 /dune-project

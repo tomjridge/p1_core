@@ -9,6 +9,9 @@ install:
 
 #	opam-installer p1_core.install  # FIXME doesn't seem to install a correct META (missing name)
 
+all:
+	$(MAKE) build
+	$(MAKE) install
 
 uninstall:
 	dune uninstall

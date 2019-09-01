@@ -4,6 +4,7 @@
   (name p1_core)
   (public_name p1_core)
   (wrapped false)
+  (flags (:standard -open Tjr_lib))
 ;  (preprocess (pps ppx_deriving_yojson))
   (libraries tjr_lib))
 

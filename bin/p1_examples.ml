@@ -1,7 +1,5 @@
-open Tjr_substring
-
-
-open Tjr_list.List_as_set
+open P1_core
+(* open List_.List_as_set *)
 
 (* to get a visual indication of runtime *)
 let start_stop s f = 
